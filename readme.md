@@ -1,2 +1,5 @@
 # Maximum Cardinality, Minimum Cost matching algorithm
-Took some concepts from the Hungarian Algorithm and some which I came up with to create this. Computational complexity is still `O(N^3)` in the worst case, with `N` being the dimension of the square matrix representing the edges. It should be quicker because it scans diagonals to find independent zeros and it finds surefire assignments for which elements in the same row/column get cancelled out in the next iteration.
+
+Algorithm I came up with by thinking about localized (2x2) swaps between independent elements and how they might help finding a minimum cost matching. I haven't demonstrated its correctness, but it seems to work well. It HAS to calculate 2 solutions that start from the 2 main different diagonals:
+
+*{(0,0), (1,1), (2,2), (3,3)} and {(0,3), (1,2), (2,1), (3,0)}.*
