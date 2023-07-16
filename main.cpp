@@ -9,13 +9,17 @@
 #define VERTICES 7
 #endif
 
+#ifndef MAX_VALUE
+#define MAX_VALUE 30
+#endif
+
 void fill_edges(int* edges)
 {
     srand(time(nullptr));
 
     for (int i=0; i<VERTICES*VERTICES; ++i)
     {
-        edges[i] = rand() % 31;
+        edges[i] = rand() % (MAX_VALUE+1);
     }
 }
 
@@ -99,16 +103,20 @@ std::array<std::pair<int, int>, VERTICES> find_best_matching(const int* edges, i
     
     std::array<std::pair<int, int>, VERTICES> res1;
     std::array<std::pair<int, int>, VERTICES> res2;
+    std::array<std::pair<int, int>, VERTICES> res3;
+    std::array<std::pair<int, int>, VERTICES> res4;
     
     // Initialize base solutions
     for (int i=0; i<N; ++i)
     {
-    	res1[i] = {i,i};
-    	res2[i] = {i,N-i-1};
+    	res1[i] = {i, i};
+    	res2[i] = {i, N-i-1};
+    	res3[i] = {N-i-1, i};
+    	res4[i] = {N-i-1, N-i-1};
     }
 
 
-    std::cout << "Processing Solution\n\n";
+    std::cout << "Processing Solution 1.\n\n";
     // Solution 1	
     while (f)
     {
@@ -165,19 +173,88 @@ std::array<std::pair<int, int>, VERTICES> find_best_matching(const int* edges, i
 	    
     }
     
+    std::cout << "\nProcessing Solution 3.\n\n";
+    
+    f = true;
+    while (f)
+    {
+    	f = false;
+    	
+    	std::cout << "Current solution: " << res3 << "\n";
+    	
+    	for (int i=0; i<N; ++i)
+	    {
+	    	std::pair<int, int> el1 = res3[i];
+	    	std::pair<int, int> el2 = res3[(i+1)%N];
+	    	
+	    	int sum1 = edges[el1.first * N + el1.second] + edges[el2.first * N + el2.second];
+	    	int sum2 = edges[el1.first * N + el2.second] + edges[el2.first * N + el1.second];
+	    	
+	    	// change res
+	    	if (sum2 < sum1)
+	    	{
+	    		res3[i] = {el1.first, el2.second};
+	    		res3[(i+1)%N] = {el2.first, el1.second};
+	    		
+	    		f = true;
+	    	}
+	    }
+	    
+    }
+    
+    std::cout << "\nProcessing Solution 4.\n\n";
+    
+    f = true;
+    while (f)
+    {
+    	f = false;
+    	
+    	std::cout << "Current solution: " << res3 << "\n";
+    	
+    	for (int i=0; i<N; ++i)
+	    {
+	    	std::pair<int, int> el1 = res4[i];
+	    	std::pair<int, int> el2 = res4[(i+1)%N];
+	    	
+	    	int sum1 = edges[el1.first * N + el1.second] + edges[el2.first * N + el2.second];
+	    	int sum2 = edges[el1.first * N + el2.second] + edges[el2.first * N + el1.second];
+	    	
+	    	// change res
+	    	if (sum2 < sum1)
+	    	{
+	    		res4[i] = {el1.first, el2.second};
+	    		res4[(i+1)%N] = {el2.first, el1.second};
+	    		
+	    		f = true;
+	    	}
+	    }
+	    
+    }
+    
     std::cout << "\n";
      
-    int cost1 = 0, cost2 = 0;
-    
+    int cost1 = 0, cost2 = 0, cost3 = 0, cost4 = 0;
+      
     for (int i=0; i<N; ++i)
     {
     	cost1 += edges[res1[i].first * N + res1[i].second];
     	cost2 += edges[res2[i].first * N + res2[i].second];
+    	cost3 += edges[res3[i].first * N + res3[i].second];
+    	cost4 += edges[res4[i].first * N + res4[i].second];
+    	
     }
     
-    std::cout << "cost solution1 = " << cost1 << ", cost solution2 = " << cost2 << "\n";
-    return (cost1 <= cost2) ? res1 : res2;
+    std::cout << "Costs: sol1="<< cost1 << ", sol2=" << cost2 << ", sol3=" << cost3 << ", sol4=" <<  cost4 << "\n\n";
+    int min = std::min({cost1, cost2, cost3, cost4});
     
+if (min == cost1)
+	return res1;
+if (min == cost2)
+	return res2;
+if (min == cost3)
+	return res3;
+else
+	return res4;  
 
 }
 
@@ -185,7 +262,15 @@ int main()
 {
     int* edges = (int*) calloc(VERTICES*VERTICES, sizeof(int));
     
-    fill_edges(edges);
+    
+    // take edges as input
+    std::cout << "Input Edges:\n";
+    for (int i=0; i<VERTICES*VERTICES; ++i)
+    {
+    	std::cin >> edges[i];
+    }
+    
+    //fill_edges(edges);
     
     std::cout << "Edges matrix:\n";
     print_matrix(std::cout, edges);
